@@ -1,6 +1,10 @@
 const expressjs = require('express');
 const routes = expressjs.Router();
-const alluserclass = require('./RoutesFunction');
+const alluserclass = require('./RotesMainFunction/RoutesFunction.js');
+const postgreSqlClass = require('./PostgreSQL/postgreSQL.js');
+
+routes.post('/verifyToken',alluserclass.verifyToken);
+routes.post('/token',alluserclass.token);
 routes.post('/enc_data',alluserclass.encrypdataMain);
 routes.post('/Login',alluserclass.validateLogin);
 routes.post('/Main',alluserclass.getMain);

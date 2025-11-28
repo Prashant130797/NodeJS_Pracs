@@ -2,13 +2,46 @@
 
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
-
-const { encryptAES, decryptAES } = require('./Encryption_Utils.js');
-const e = require("express");
+require("dotenv").config();
+const { encryptAES, decryptAES } = require('../Encryption_Utils.js');
 
 
 
 class AllRoutesFunction {
+    name = "";
+    age = 0;
+
+    token(req, resp) {
+        try {
+            // console.log(require("crypto").randomBytes(64).toString("hex")); //Generate Secret Key
+            const secretKey = process.env.SECRET_KEY;
+            const { name, password } = req.body;
+            const token = jwt.sign({ name, password }, secretKey, { expiresIn: "20s"});
+            console.log("the token is ", token);
+            resp.status(200).send({ "token": token });
+        } catch (error) {
+            console.log("the error is", error);
+        }
+    }
+
+    verifyToken(req, resp) {
+        try {
+            const { token } = req.headers;
+            const secretKey = process.env.SECRET_KEY;
+            const verifyTkn = jwt.verify(token, secretKey);
+            const decoded = jwt.decode(token, { complete: true });
+            console.log("the token is ==>>", decoded);
+            resp.status(200).send({ "status": 200, "Mesage": "Token not Experied"  ,"token":verifyTkn});
+
+        } catch (error) {
+            if (error.name === "TokenExpiredError") {
+                resp.status(200).send({ "status": 200, "Mesage": "Token Experied" });
+            } else {
+                console.log("❌ Invalid token:", error.message);
+            }
+        }
+    }
+
 
     encrypdataMain(req, resp) {
         console.log("The enc ===>>>>");
@@ -20,7 +53,7 @@ class AllRoutesFunction {
             };
             const jsonEncode = JSON.stringify(jsonBody);
             var encData = encryptAES(jsonEncode);
-            var decData = decryptAES(encData.data,encData.iv);
+            var decData = decryptAES(encData.data, encData.iv);
             console.log("THE ENC DATA", decData);
 
             resp.status(200).send({ "body": encData });
